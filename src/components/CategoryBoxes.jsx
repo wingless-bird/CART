@@ -17,26 +17,17 @@ export default function CategoryBoxes() {
       overflowX: 'auto',
       paddingBottom: '16px'
     }}>
-      {/* 📱 Injecting mobile spacing styles directly into the document */}
-      <style>{`
-        @media (max-width: 768px) {
-          .mobile-box {
-            margin-bottom: 16px !important;
-          }
-        }
-      `}</style>
-
       {CATEGORY_BOXES.map((box, index) => (
         <Link 
           key={index} 
           to={box.path} 
-          className="mobile-box" // 🌟 Applied the mobile class here
           style={{ 
             display: 'flex', 
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '14px', 
+            // 🌟 Gradient Overlays pulling dark luxury look straight from the image
             backgroundImage: `linear-gradient(to bottom, rgba(37, 18, 84, 0.3) 0%, rgba(13, 6, 32, 0.9) 100%), url(${box.img})`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
