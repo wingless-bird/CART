@@ -16,21 +16,19 @@ const styles = {
 };
 
 export default function CartDrawer({ isOpen, onClose }) {
-  // Pull clearCart alongside standard drawer context variables
-  const { cart, updateQuantity, removeFromCart, clearCart } = useInventory();
+  const { cart = [], updateCartQuantity, removeFromCart, processCheckout } = useInventory() || {};
 
   if (!isOpen) return null;
 
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = subtotal > 0 ? 3.50 : 0;
-  const tax = subtotal * 0.08;
+  const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price || 0) * item.quantity), 0);
+  const deliveryFee = subtotal > 0 ? 100.00 : 0;
+  const tax = subtotal * 0.19;
   const grandTotal = subtotal + deliveryFee + tax;
 
-  // NEW: Refactored checkout submission handler sequence
-  const handlePaymentSubmit = () => {
-    alert(`🎉 Order placed successfully! Amount charged: $${grandTotal.toFixed(2)}`);
-    clearCart(); // Wipes the cart items out completely
-    onClose();   // Safely tucks the drawer back off screen automatically
+  const handlePaymentSubmit = async () => {
+    if (processCheckout) {
+      await processCheckout(grandTotal, onClose);
+    }
   };
 
   return (
@@ -48,18 +46,32 @@ export default function CartDrawer({ isOpen, onClose }) {
             cart.map(item => (
               <div key={item.id} style={styles.itemRow}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '32px' }}>{item.icon}</span>
+                  {/* 🌟 FIXED: Swapped out the raw text emoji element block for a miniature <img> thumbnail avatar map */}
+                  <img 
+                    src={item.image_url || 'https://placeholder.com'} 
+                    alt={item.name} 
+                    style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }} 
+                  />
                   <div>
                     <h4 style={{ margin: '0 0 4px 0', color: '#0f172a' }}>{item.name}</h4>
-                    <span style={{ color: '#16a34a', fontWeight: '600', fontSize: '14px' }}>${item.price.toFixed(2)}</span>
+                    <span style={{ color: '#16a34a', fontWeight: '600', fontSize: '14px' }}>
+                      PKR {parseFloat(item.price || 0).toFixed(2)}
+                    </span>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <button onClick={() => updateQuantity(item.id, -1)} style={styles.qtyBtn}>-</button>
+                  <button onClick={() => updateCartQuantity(item.id, -1)} style={styles.qtyBtn}>-</button>
                   <span style={{ fontWeight: '600', width: '20px', textAlign: 'center' }}>{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item.id, 1)} style={styles.qtyBtn}>+</button>
-                  <button onClick={() => removeFromCart(item.id)} style={{ ...styles.closeBtn, fontSize: '18px', marginLeft: '6px' }}>🗑️</button>
+                  <button onClick={() => updateCartQuantity(item.id, 1)} style={styles.qtyBtn}>+</button>
+                  
+                  <button 
+                    onClick={() => removeFromCart(item.id)} 
+                    style={{ background: 'none', border: 'none', fontSize: '18px', cursor: 'pointer', marginLeft: '6px' }}
+                    title="Remove Item"
+                  >
+                    🗑️
+                  </button>
                 </div>
               </div>
             ))
@@ -68,12 +80,11 @@ export default function CartDrawer({ isOpen, onClose }) {
 
         {cart.length > 0 && (
           <div style={styles.footer}>
-            <div style={styles.billRow}><span>Items Subtotal:</span><span>${subtotal.toFixed(2)}</span></div>
-            <div style={styles.billRow}><span>Estimated Tax (8%):</span><span>${tax.toFixed(2)}</span></div>
-            <div style={styles.billRow}><span>Flat Delivery Fee:</span><span>${deliveryFee.toFixed(2)}</span></div>
-            <div style={styles.totalRow}><span>Total Bill:</span><span>${grandTotal.toFixed(2)}</span></div>
+            <div style={styles.billRow}><span>Items Subtotal:</span><span>PKR {subtotal.toFixed(2)}</span></div>
+            <div style={styles.billRow}><span>Estimated Tax (19%):</span><span>PKR {tax.toFixed(2)}</span></div>
+            <div style={styles.billRow}><span>Flat Delivery Fee:</span><span>PKR {deliveryFee.toFixed(2)}</span></div>
+            <div style={styles.totalRow}><span>Total Bill:</span><span>PKR {grandTotal.toFixed(2)}</span></div>
             
-            {/* CHANGED: TRIGGERS CLEAN FUNCTION ON CLICK EVENT */}
             <button onClick={handlePaymentSubmit} style={styles.checkoutBtn}>
               Proceed to Secure Checkout
             </button>

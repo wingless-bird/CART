@@ -2,93 +2,65 @@ import React from 'react';
 import { useInventory } from '../context/InventoryContext';
 
 export default function CategoryProductsView({ title, category }) {
-  const { inventory, addToCart } = useInventory();
+  const { inventory, cart, addToCart, searchQuery } = useInventory();
 
-  // Strict structural filtering matching database strings exactly
-  const displayedProducts = category === 'All' 
-    ? inventory 
-    : inventory.filter(item => item.category === category);
+  const displayed = inventory
+    .filter(p => category === 'All' || p.category === category)
+    .filter(p => p.name.toLowerCase().includes((searchQuery || '').toLowerCase()));
 
   return (
-    <div style={{ fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto' }}>
-      {/* SECTION HEADER BLOCK */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
-        <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#0f172a' }}>{title}</h2>
-        <span style={{ backgroundColor: '#10b981', color: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: '600' }}>
-          {displayedProducts.length} Items Available
+    <div style={{ fontFamily: '"Inter", sans-serif', maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(147, 51, 234, 0.25)', paddingBottom: '16px', marginBottom: '32px' }}>
+        <h2 style={{ margin: 0, fontSize: '26px', fontWeight: '800', color: '#fff', textShadow: '0 0 15px rgba(0, 242, 255, 0.4)' }}>{title}</h2>
+        <span style={{ backgroundColor: 'rgba(0, 242, 255, 0.12)', color: '#00f2ff', padding: '6px 16px', borderRadius: '20px', fontSize: '13px', fontWeight: '700', border: '1px solid rgba(0, 242, 255, 0.25)' }}>
+          {displayed.length} Items Available
         </span>
       </div>
 
-      {/* RENDER GRID RESPONSIVELY */}
-      {displayedProducts.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 20px', backgroundColor: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          <span style={{ fontSize: '48px', display: 'block', marginBottom: '16px' }}>🛒</span>
-          <h3 style={{ margin: '0 0 8px 0', color: '#475569' }}>Awaiting Stock Drop</h3>
-          <p style={{ margin: 0, color: '#94a3b8', fontSize: '14px' }}>No items found under "{category}". Jump over to the Admin Panel to seed inventory!</p>
-        </div>
+      {displayed.length === 0 ? (
+        <p style={{ textAlign: 'center', padding: '40px', color: '#8b87a3' }}>No items found matching your filters 🛒</p>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '24px' }}>
-          {displayedProducts.map((product) => (
-            <div 
-              key={product.id} 
-              style={{ 
-                backgroundColor: 'white', 
-                borderRadius: '12px', 
-                border: '1px solid #e2e8f0', 
-                padding: '20px', 
-                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'space-between',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)';
-              }}
-            >
-              {/* PRODUCT IMAGE & INFO CHASSIS */}
-              <div>
-                <div style={{ backgroundColor: '#f8fafc', borderRadius: '8px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '64px', marginBottom: '16px' }}>
-                  {product.icon || '📦'}
-                </div>
-                <span style={{ display: 'inline-block', backgroundColor: '#f1f5f9', color: '#475569', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', padding: '2px 8px', borderRadius: '4px', marginBottom: '8px' }}>
-                  {product.category}
-                </span>
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: '700', color: '#1e293b' }}>{product.name}</h3>
-              </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '28px' }}>
+          {displayed.map(p => {
+            const inCart = cart.find(i => parseInt(i.id, 10) === parseInt(p.id, 10));
+            const price = parseFloat(p.price || 0);
 
-              {/* ACTION / PRICING PANEL FOOTER */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '20px', fontWeight: '800', color: '#10b981' }}>
-                  ${parseFloat(product.price || 0).toFixed(2)}
-                </span>
-                <button 
-                  onClick={() => addToCart(product)}
-                  style={{ 
-                    backgroundColor: '#10b981', 
-                    color: 'white', 
-                    border: 'none', 
-                    padding: '8px 16px', 
-                    borderRadius: '8px', 
-                    fontWeight: '600', 
-                    fontSize: '13px', 
-                    cursor: 'pointer',
-                    transition: 'background-color 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
-                >
-                  Add to Cart
-                </button>
+            return (
+              <div key={p.id} className="product-card" style={{ background: 'linear-gradient(135deg, rgba(25, 12, 58, 0.5) 0%, rgba(13, 6, 32, 0.8) 100%)', border: '1px solid rgba(147, 51, 234, 0.25)', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  {/* 🌟 FIXED: Swapped out the old emoji text field block for a crisp HTML <img> tag mapping to item.image_url */}
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', height: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px', overflow: 'hidden' }}>
+                    <img 
+                      src={p.image_url || 'https://placeholder.com'} 
+                      alt={p.name} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    />
+                  </div>
+                  <span style={{ backgroundColor: 'rgba(147, 51, 234, 0.15)', color: '#d8b4fe', fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid rgba(147, 51, 234, 0.2)' }}>{p.category}</span>
+                  <h3 style={{ margin: '14px 0 8px 0', fontSize: '20px', fontWeight: '700', color: '#fff' }}>{p.name}</h3>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '22px', fontWeight: '800', color: '#00f2ff', textShadow: '0 0 10px rgba(0, 242, 255, 0.3)' }}>PKR {price.toFixed(2)}</span>
+                    {inCart && <span style={{ fontSize: '12px', color: '#8b87a3' }}>Total: PKR {(price * inCart.quantity).toFixed(2)}</span>}
+                  </div>
+
+                  <button 
+                    onClick={() => addToCart(p)} 
+                    style={{ 
+                      backgroundColor: inCart ? 'rgba(147, 51, 234, 0.15)' : '#00f2ff', 
+                      color: inCart ? '#00f2ff' : '#0d0620', 
+                      border: inCart ? '1px solid rgba(0, 242, 255, 0.4)' : 'none', 
+                      padding: '12px', borderRadius: '10px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' 
+                    }}
+                  >
+                    {inCart ? `Add More (${inCart.quantity})` : 'Add to Cart'}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

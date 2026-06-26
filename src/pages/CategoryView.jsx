@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useInventory } from '../context/InventoryContext';
+import { supabase } from '../supabaseClient'; 
 
 export default function CategoryView({ title, category }) {
   const { inventory, addItem, updateItem, deleteItem, salesTotal } = useInventory();
 
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
-  const [newIcon, setNewIcon] = useState('📦');
+  const [imageFile, setImageFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [newCategory, setNewCategory] = useState(category === 'All' ? 'Food & Drinks' : category);
 
   useEffect(() => { 
@@ -17,7 +19,6 @@ export default function CategoryView({ title, category }) {
   const [editName, setEditName] = useState('');
   const [editPrice, setEditPrice] = useState('');
 
-  // Strict sorting evaluation layer
   const filteredItems = category === 'All' 
     ? inventory 
     : inventory.filter(item => item.category === category);
@@ -25,18 +26,45 @@ export default function CategoryView({ title, category }) {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!newName || !newPrice) return alert("Please fill out all product parameters.");
+    if (!imageFile) return alert("Please select a product image file to upload.");
     
-    // Let Supabase assign IDs sequentially on its own
-    await addItem({ 
-      name: newName, 
-      category: newCategory, 
-      price: parseFloat(newPrice), 
-      icon: newIcon 
-    });
-    
-    setNewName(''); 
-    setNewPrice(''); 
-    setNewIcon('📦');
+    setIsUploading(true);
+    let finalImageUrl = "";
+
+    try {
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `public/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, imageFile);
+
+      if (uploadError) {
+        alert("Image upload failed: " + uploadError.message);
+        setIsUploading(false);
+        return;
+      }
+
+      const { data } = supabase.storage.from('product-images').getPublicUrl(filePath);
+      if (data) finalImageUrl = data.publicUrl;
+
+      await addItem({ 
+        name: newName, 
+        category: newCategory, 
+        price: parseFloat(newPrice), 
+        image_url: finalImageUrl 
+      });
+      
+      setNewName(''); 
+      setNewPrice(''); 
+      setImageFile(null);
+      e.target.reset();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const startEdit = (item) => {
@@ -57,22 +85,29 @@ export default function CategoryView({ title, category }) {
 
       <div style={{ backgroundColor: '#0f172a', color: '#fff', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
         <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '1px' }}>💰 Total Store Revenue</span>
-        <h3 style={{ margin: 0, fontSize: '28px', color: '#38bdf8', fontWeight: '800' }}>${(salesTotal || 0).toFixed(2)}</h3>
+        <h3 style={{ margin: 0, fontSize: '28px', color: '#38bdf8', fontWeight: '800' }}>PKR {(salesTotal || 0).toFixed(2)}</h3>
       </div>
 
       <div style={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
         <h4 style={{ margin: '0 0 12px 0', color: '#475569' }}>➕ Inject New Product Line</h4>
-        <form onSubmit={handleCreate} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-          <input type="text" placeholder="Name" value={newName} onChange={e => setNewName(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', flex: '1 1 140px' }} />
-          <input type="number" step="0.01" placeholder="Price" value={newPrice} onChange={e => setNewPrice(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', flex: '1 1 100px' }} />
-          <input type="text" placeholder="Emoji" value={newIcon} onChange={e => setNewIcon(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', flex: '1 1 60px', maxWidth: '80px' }} />
+        <form onSubmit={handleCreate} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
+          <input type="text" placeholder="Product Name" value={newName} onChange={e => setNewName(e.target.value)} required style={{ padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', flex: '1 1 140px' }} />
+          <input type="number" step="0.01" placeholder="Price" value={newPrice} onChange={e => setNewPrice(e.target.value)} required style={{ padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', flex: '1 1 100px' }} />
+          
+          <div style={{ flex: '1 1 200px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '12px', color: '#64748b', fontWeight: '600' }}>Product Image File:</label>
+            <input type="file" accept="image/*" onChange={e => setImageFile(e.target.files[0])} required style={{ fontSize: '12px' }} />
+          </div>
+          
           <select value={newCategory} onChange={e => setNewCategory(e.target.value)} style={{ padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '14px', backgroundColor: '#fff' }}>
             <option value="Food & Drinks">Food & Drinks</option>
             <option value="Vegetables">Vegetables</option>
             <option value="Fruits">Fruits</option>
             <option value="Groceries">Groceries</option>
           </select>
-          <button type="submit" style={{ padding: '8px 16px', backgroundColor: '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: 'pointer', fontSize: '14px' }}>Save</button>
+          <button type="submit" disabled={isUploading} style={{ padding: '8px 16px', backgroundColor: isUploading ? '#64748b' : '#16a34a', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: '600', cursor: isUploading ? 'not-allowed' : 'pointer', fontSize: '14px' }}>
+            {isUploading ? "Uploading..." : "Save"}
+          </button>
         </form>
       </div>
 
@@ -96,14 +131,19 @@ export default function CategoryView({ title, category }) {
             ) : (
               filteredItems.map(item => (
                 <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '12px', fontSize: '14px' }}>
-                    {item.icon} {editingId === item.id ? <input value={editName} onChange={e => setEditName(e.target.value)} style={{ padding: '4px', width: '100px' }} /> : <strong>{item.name}</strong>}
+                  <td style={{ padding: '12px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <img 
+                      src={item.image_url || 'https://placeholder.com'} 
+                      alt={item.name} 
+                      style={{ width: '40px', height: '40px', borderRadius: '6px', objectFit: 'cover', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }} 
+                    />
+                    {editingId === item.id ? <input value={editName} onChange={e => setEditName(e.target.value)} style={{ padding: '4px', width: '100px' }} /> : <strong>{item.name}</strong>}
                   </td>
                   <td style={{ padding: '12px', fontSize: '12px' }}>
                     <span style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px' }}>{item.category}</span>
                   </td>
                   <td style={{ padding: '12px', fontSize: '14px', fontWeight: '600', color: '#16a34a' }}>
-                    {editingId === item.id ? <input type="number" step="0.01" value={editPrice} onChange={e => setEditPrice(e.target.value)} style={{ padding: '4px', width: '60px' }} /> : `$${(parseFloat(item.price) || 0).toFixed(2)}`}
+                    {editingId === item.id ? <input type="number" step="0.01" value={editPrice} onChange={e => setEditPrice(e.target.value)} style={{ padding: '4px', width: '60px' }} /> : `PKR ${(parseFloat(item.price) || 0).toFixed(2)}`}
                   </td>
                   <td style={{ padding: '12px', textAlign: 'right' }}>
                     {editingId === item.id ? (

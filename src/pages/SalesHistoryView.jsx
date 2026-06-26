@@ -12,7 +12,8 @@ export default function SalesHistoryView() {
       <div style={{ backgroundColor: '#0f172a', color: '#fff', borderRadius: '12px', padding: '24px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '1px' }}>Total Cumulative Gross Revenue</span>
-          <h3 style={{ margin: 0, fontSize: '36px', color: '#38bdf8', fontWeight: '800', marginTop: '4px' }}>${(salesTotal || 0).toFixed(2)}</h3>
+          {/* 🌟 FIXED: Changed currency presentation string indicator from $ to PKR for Total Cumulative Gross Revenue */}
+          <h3 style={{ margin: 0, fontSize: '36px', color: '#38bdf8', fontWeight: '800', marginTop: '4px' }}>PKR {(salesTotal || 0).toFixed(2)}</h3>
         </div>
         <div style={{ textAlign: 'right' }}>
           <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '1px' }}>Processed Orders</span>
@@ -53,7 +54,8 @@ export default function SalesHistoryView() {
                     </span>
                   </td>
                   <td style={{ padding: '14px 20px', fontSize: '16px', fontWeight: '700', color: '#16a34a', textAlign: 'right' }}>
-                    +${parseFloat(record.amount || 0).toFixed(2)}
+                    {/* 🌟 FIXED: Changed currency presentation string indicator from +$ to +PKR for table row sales totals */}
+                    +PKR {parseFloat(record.amount || 0).toFixed(2)}
                   </td>
                 </tr>
               ))

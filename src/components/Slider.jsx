@@ -8,10 +8,10 @@ const SLIDES = [
 
 export default function Slider() {
   const [idx, setIdx] = useState(0);
-  const [height, setHeight] = useState(window.innerWidth < 768 ? '280px' : '500px');
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
-    const handleResize = () => setHeight(window.innerWidth < 768 ? '280px' : '500px');
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     const t = setInterval(() => setIdx(p => (p + 1) % SLIDES.length), 5000);
     return () => { clearInterval(t); window.removeEventListener('resize', handleResize); };
@@ -20,12 +20,21 @@ export default function Slider() {
   const s = SLIDES[idx];
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: height, backgroundImage: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.7)), url(${s.img})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '16px', padding: window.innerWidth < 768 ? '30px' : '60px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', transition: 'background-image 0.8s ease-in-out', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ margin: '0 0 8px 0', fontSize: window.innerWidth < 768 ? '24px' : '42px', color: '#fff', fontWeight: '800', textShadow: '0 2px 6px rgba(0,0,0,0.6)' }}>{s.title}</h2>
-      <p style={{ margin: '0 0 16px 0', fontSize: window.innerWidth < 768 ? '14px' : '18px', color: '#f8fafc', maxWidth: '600px', lineHeight: '1.5', textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>{s.text}</p>
-      <div style={{ position: 'absolute', bottom: '16px', right: '20px', display: 'flex', gap: '8px' }}>
+    <div style={{ 
+      position: 'relative', width: '100%', height: isMobile ? '280px' : '520px', 
+      backgroundImage: `linear-gradient(135deg, rgba(37, 18, 84, 0.4) 0%, rgba(5, 2, 12, 0.8) 100%), url(${s.img})`, 
+      backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '24px', 
+      padding: isMobile ? '30px' : '60px', boxSizing: 'border-box', 
+      display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center',
+      border: '1px solid rgba(147, 51, 234, 0.25)',
+      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)'
+    }}>
+      <h2 style={{ margin: '0 0 16px 0', fontSize: isMobile ? '28px' : '48px', color: '#fff', fontWeight: '800', letterSpacing: '-0.02em', textShadow: '0 4px 15px rgba(0,0,0,0.9), 0 0 20px rgba(147, 51, 234, 0.6)' }}>{s.title}</h2>
+      <p style={{ margin: '0 0 32px 0', fontSize: isMobile ? '14px' : '18px', color: '#d1cee3', maxWidth: '640px', lineHeight: '1.6', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{s.text}</p>
+      
+      <div style={{ position: 'absolute', bottom: '28px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '12px' }}>
         {SLIDES.map((_, i) => (
-          <button key={i} onClick={() => setIdx(i)} style={{ width: '8px', height: '8px', borderRadius: '50%', border: '2px solid #fff', backgroundColor: idx === i ? '#fff' : 'transparent', cursor: 'pointer' }} />
+          <button key={i} onClick={() => setIdx(i)} style={{ width: idx === i ? '24px' : '8px', height: '8px', borderRadius: '4px', border: 'none', backgroundColor: idx === i ? '#00f2ff' : 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 0, transition: 'all 0.3s ease' }} />
         ))}
       </div>
     </div>
