@@ -7,7 +7,7 @@ export default function StoreHome() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#F7F8F3',
+        background: 'rgba(9, 26, 21, 0.7)',
         paddingBottom: '60px'
       }}
     >
@@ -34,7 +34,7 @@ export default function StoreHome() {
         >
           <h2
             style={{
-              color: '#1F2937',
+              color: 'black',
               fontSize: 'clamp(28px, 5vw, 42px)',
               fontWeight: '800',
               margin: 0,
@@ -47,7 +47,7 @@ export default function StoreHome() {
           <p
             style={{
               marginTop: '12px',
-              color: '#6B7280',
+              color: '#dee2e9',
               fontSize: '16px'
             }}
           >
