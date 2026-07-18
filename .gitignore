@@ -1,0 +1,14 @@
+# Block the heavy dependencies folder from uploading
+node_modules/
+
+# Block local environment credential files
+.env
+.env.local
+
+# Block production build outputs
+dist/
+build/
+
+# Block system files
+.DS_Store
+Thumbs.db
