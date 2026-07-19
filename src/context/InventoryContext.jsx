@@ -58,10 +58,15 @@ export function InventoryProvider({ children }) {
   const addItem = async (formData) => {
     try {
 
+      const token = localStorage.getItem("adminToken");
+
       const response = await fetch(
         `${API_BASE}/products`,
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
           body: formData
         }
       );
@@ -94,12 +99,15 @@ export function InventoryProvider({ children }) {
   const updateItem = async (item) => {
     try {
 
+      const token = localStorage.getItem("adminToken");
+
       const response = await fetch(
         `${API_BASE}/products/${item.id}`,
         {
           method: "PUT",
           headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
           },
           body: JSON.stringify(item)
         }
@@ -136,10 +144,15 @@ export function InventoryProvider({ children }) {
   const deleteItem = async (id) => {
     try {
 
+      const token = localStorage.getItem("adminToken");
+
       const response = await fetch(
         `${API_BASE}/products/${id}`,
         {
-          method: "DELETE"
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
       );
 
@@ -393,31 +406,43 @@ export function InventoryProvider({ children }) {
     password
   ) => {
 
-    const savedUsername =
-      localStorage.getItem("adminUsername")
-      || "admin";
+    try {
 
-    const savedPassword =
-      localStorage.getItem("adminPassword")
-      || "1234";
+      const response = await fetch(
+        `${API_BASE}/auth/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password })
+        }
+      );
 
-    if (
-      username === savedUsername &&
-      password === savedPassword
-    ) {
+      const data = await response.json();
 
-      setIsAdminLoggedIn(true);
+      if (!response.ok) {
+        return false;
+      }
+
+      localStorage.setItem("adminToken", data.token);
 
       localStorage.setItem(
         "isAdminLoggedIn",
         "true"
       );
 
+      setIsAdminLoggedIn(true);
+
       return true;
 
-    }
+    } catch (error) {
 
-    return false;
+      console.error("Login Error:", error);
+
+      return false;
+
+    }
 
   };
 
@@ -432,6 +457,8 @@ export function InventoryProvider({ children }) {
     localStorage.removeItem(
       "isAdminLoggedIn"
     );
+
+    localStorage.removeItem("adminToken");
 
   };
 
@@ -454,21 +481,56 @@ export function InventoryProvider({ children }) {
 
     }
 
-    localStorage.setItem(
-      "adminUsername",
-      username
-    );
+    try {
 
-    localStorage.setItem(
-      "adminPassword",
-      password
-    );
+      const token = localStorage.getItem("adminToken");
 
-    alert(
-      "Admin credentials updated successfully."
-    );
+      const response = await fetch(
+        `${API_BASE}/auth/change-credentials`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            newUsername: username,
+            newPassword: password
+          })
+        }
+      );
 
-    return true;
+      const data = await response.json();
+
+      if (!response.ok) {
+
+        alert(
+          data.message ||
+          "Failed to update credentials."
+        );
+
+        return false;
+
+      }
+
+      alert(
+        "Admin credentials updated successfully."
+      );
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+        "Credential Update Error:",
+        error
+      );
+
+      alert("Something went wrong.");
+
+      return false;
+
+    }
 
   };
     // ==========================================================
