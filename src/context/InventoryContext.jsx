@@ -1,9 +1,21 @@
-import React, {createContext,useContext,useEffect,useMemo,useState} from "react";
+import React,{
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
+
 const InventoryContext = createContext();
 
-const API_BASE = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
+const API_BASE =
+  `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api`;
 
 export function InventoryProvider({ children }) {
+
+  // ==========================================================
+  // STATE
+  // ==========================================================
 
   const [inventory, setInventory] = useState([]);
 
@@ -13,20 +25,48 @@ export function InventoryProvider({ children }) {
 
   const [cart, setCart] = useState([]);
 
+  // JWT Session State — token lives in localStorage
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(
-    () => localStorage.getItem("isAdminLoggedIn") === "true"
+    () => !!localStorage.getItem("adminToken")
   );
 
+  // Kept so AdminLogin.jsx's existing authLoading checks still work —
+  // there's nothing async to wait on with Bearer auth, so this
+  // resolves immediately.
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // ==========================================================
+  // INITIAL LOAD
+  // ==========================================================
+
   useEffect(() => {
+
     fetchInventory();
+
     fetchSalesRecords();
+
   }, []);
+
+  // ==========================================================
+  // AUTH HEADER HELPER
+  // ==========================================================
+
+  const authHeader = () => {
+
+    const token = localStorage.getItem("adminToken");
+
+    return token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
+
+  };
 
   // ==========================================================
   // FETCH INVENTORY
   // ==========================================================
 
   const fetchInventory = async () => {
+
     try {
 
       const response = await fetch(
@@ -49,6 +89,7 @@ export function InventoryProvider({ children }) {
       );
 
     }
+
   };
 
   // ==========================================================
@@ -56,17 +97,18 @@ export function InventoryProvider({ children }) {
   // ==========================================================
 
   const addItem = async (formData) => {
-    try {
 
-      const token = localStorage.getItem("adminToken");
+    try {
 
       const response = await fetch(
         `${API_BASE}/products`,
         {
           method: "POST",
+
           headers: {
-            Authorization: `Bearer ${token}`
+            ...authHeader()
           },
+
           body: formData
         }
       );
@@ -90,6 +132,7 @@ export function InventoryProvider({ children }) {
       );
 
     }
+
   };
 
   // ==========================================================
@@ -97,18 +140,19 @@ export function InventoryProvider({ children }) {
   // ==========================================================
 
   const updateItem = async (item) => {
-    try {
 
-      const token = localStorage.getItem("adminToken");
+    try {
 
       const response = await fetch(
         `${API_BASE}/products/${item.id}`,
         {
           method: "PUT",
+
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+            ...authHeader()
           },
+
           body: JSON.stringify(item)
         }
       );
@@ -120,11 +164,15 @@ export function InventoryProvider({ children }) {
       const updated = await response.json();
 
       setInventory((prev) =>
+
         prev.map((product) =>
+
           product.id === updated.id
             ? updated
             : product
+
         )
+
       );
 
     } catch (error) {
@@ -135,6 +183,7 @@ export function InventoryProvider({ children }) {
       );
 
     }
+
   };
 
   // ==========================================================
@@ -142,16 +191,16 @@ export function InventoryProvider({ children }) {
   // ==========================================================
 
   const deleteItem = async (id) => {
-    try {
 
-      const token = localStorage.getItem("adminToken");
+    try {
 
       const response = await fetch(
         `${API_BASE}/products/${id}`,
         {
           method: "DELETE",
+
           headers: {
-            Authorization: `Bearer ${token}`
+            ...authHeader()
           }
         }
       );
@@ -161,9 +210,11 @@ export function InventoryProvider({ children }) {
       }
 
       setInventory((prev) =>
+
         prev.filter(
           (item) => item.id !== id
         )
+
       );
 
     } catch (error) {
@@ -174,8 +225,10 @@ export function InventoryProvider({ children }) {
       );
 
     }
+
   };
-    // ==========================================================
+
+  // ==========================================================
   // ADD TO CART
   // ==========================================================
 
@@ -191,7 +244,8 @@ export function InventoryProvider({ children }) {
 
     const netAmount = Number(
       item.netAmount ||
-      grossAmount - (grossAmount * discount) / 100
+      grossAmount -
+      (grossAmount * discount) / 100
     );
 
     const cartItem = {
@@ -291,7 +345,8 @@ export function InventoryProvider({ children }) {
     );
 
   };
-    // ==========================================================
+
+  // ==========================================================
   // FETCH SALES RECORDS
   // ==========================================================
 
@@ -359,9 +414,11 @@ export function InventoryProvider({ children }) {
         `${API_BASE}/sales`,
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json"
           },
+
           body: JSON.stringify(payload)
         }
       );
@@ -412,25 +469,27 @@ export function InventoryProvider({ children }) {
         `${API_BASE}/auth/login`,
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ username, password })
+
+          body: JSON.stringify({
+            username,
+            password
+          })
         }
       );
 
       const data = await response.json();
 
       if (!response.ok) {
+
         return false;
+
       }
 
       localStorage.setItem("adminToken", data.token);
-
-      localStorage.setItem(
-        "isAdminLoggedIn",
-        "true"
-      );
 
       setIsAdminLoggedIn(true);
 
@@ -438,7 +497,10 @@ export function InventoryProvider({ children }) {
 
     } catch (error) {
 
-      console.error("Login Error:", error);
+      console.error(
+        "Login Error:",
+        error
+      );
 
       return false;
 
@@ -452,13 +514,9 @@ export function InventoryProvider({ children }) {
 
   const logoutAdmin = () => {
 
-    setIsAdminLoggedIn(false);
-
-    localStorage.removeItem(
-      "isAdminLoggedIn"
-    );
-
     localStorage.removeItem("adminToken");
+
+    setIsAdminLoggedIn(false);
 
   };
 
@@ -483,16 +541,16 @@ export function InventoryProvider({ children }) {
 
     try {
 
-      const token = localStorage.getItem("adminToken");
-
       const response = await fetch(
         `${API_BASE}/auth/change-credentials`,
         {
           method: "PUT",
+
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+            ...authHeader()
           },
+
           body: JSON.stringify({
             newUsername: username,
             newPassword: password
@@ -533,29 +591,21 @@ export function InventoryProvider({ children }) {
     }
 
   };
-    // ==========================================================
+
+  // ==========================================================
   // FILTERED INVENTORY
   // ==========================================================
 
   const filteredInventory = useMemo(() => {
 
-    const query = searchQuery
-      .trim()
-      .toLowerCase();
+    const query = searchQuery.trim().toLowerCase();
 
-    if (!query) {
-      return inventory;
-    }
+    if (!query) return inventory;
 
     return inventory.filter((item) => {
 
-      const name =
-        (item.name || "")
-          .toLowerCase();
-
-      const category =
-        (item.category || "")
-          .toLowerCase();
+      const name = (item.name || "").toLowerCase();
+      const category = (item.category || "").toLowerCase();
 
       return (
         name.includes(query) ||
@@ -583,8 +633,7 @@ export function InventoryProvider({ children }) {
 
         salesTotal: salesRecords.reduce(
           (total, record) =>
-            total +
-            Number(record.amount || 0),
+            total + Number(record.amount || 0),
           0
         ),
 
@@ -609,6 +658,8 @@ export function InventoryProvider({ children }) {
         processCheckout,
 
         isAdminLoggedIn,
+
+        authLoading,
 
         loginAdmin,
 

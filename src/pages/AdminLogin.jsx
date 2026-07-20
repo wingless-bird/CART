@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useInventory } from "../context/InventoryContext";
 
@@ -7,16 +7,51 @@ export default function AdminLogin() {
 
 
   const {
-    isAdminLoggedIn,
-    loginAdmin,
-    logoutAdmin,
-    changeAdminPassword
-  } = useInventory();
+  isAdminLoggedIn,
+  authLoading,
+  loginAdmin,
+  logoutAdmin,
+  changeAdminPassword
+} = useInventory();
 
 
   const navigate = useNavigate();
 
+  // ==================================================
+// WAIT FOR JWT SESSION CHECK
+// ==================================================
 
+useEffect(() => {
+
+  if (!authLoading && isAdminLoggedIn) {
+
+    navigate("/admin", {
+      replace: true
+    });
+
+  }
+
+}, [
+  authLoading,
+  isAdminLoggedIn,
+  navigate
+]);
+
+if (authLoading) {
+
+  return (
+
+    <div className="admin-login-page">
+
+      <h2>
+        Checking session...
+      </h2>
+
+    </div>
+
+  );
+
+}
 
   // ==========================
   // LOGIN STATE
@@ -66,7 +101,9 @@ export default function AdminLogin() {
 
       if(success){
 
-        navigate("/admin");
+      navigate("/admin", {
+        replace: true
+      });
 
       }
       else{
@@ -195,7 +232,7 @@ export default function AdminLogin() {
 
 
         <p className="admin-security-subtitle">
-          Update admin username and password stored in this browser.
+          Update administrator username and password.
         </p>
 
 
@@ -371,8 +408,9 @@ export default function AdminLogin() {
 
               logoutAdmin();
 
-              navigate("/");
-
+            navigate("/", {
+              replace: true
+            });
             }}
             className="admin-logout-btn"
           >
