@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useInventory } from "../context/InventoryContext";
 
 
@@ -16,6 +16,7 @@ export default function AdminLogin() {
 
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   // ==================================================
 // WAIT FOR JWT SESSION CHECK
@@ -23,7 +24,11 @@ export default function AdminLogin() {
 
 useEffect(() => {
 
-  if (!authLoading && isAdminLoggedIn) {
+  if (
+    !authLoading &&
+    isAdminLoggedIn &&
+    location.pathname === "/admin-login"
+  ) {
 
     navigate("/admin", {
       replace: true
@@ -34,6 +39,7 @@ useEffect(() => {
 }, [
   authLoading,
   isAdminLoggedIn,
+  location.pathname,
   navigate
 ]);
 
