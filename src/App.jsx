@@ -1,3 +1,16 @@
+import { createBrowserRouter, Navigate } from "react-router-dom";
+
+import { useInventory } from "./context/InventoryContext";
+
+import StoreLayout from "./pages/StoreLayout";
+import StoreHome from "./pages/StoreHome";
+import CategoryProductsView from "./pages/CategoryProductsView";
+import SearchResults from "./pages/SearchResults";
+import AdminLogin from "./pages/AdminLogin";
+import InventoryDashboard from "./pages/InventoryDashboard";
+import CategoryView from "./pages/CategoryView";
+import SalesHistoryView from "./pages/SalesHistoryView";
+
 // ==========================================================
 // PROTECTED ROUTE
 // Waits for JWT session check before redirecting.
