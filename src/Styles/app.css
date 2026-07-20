@@ -2563,7 +2563,193 @@ section{
 }
 
 
+/* ==========================================================
+   ADMIN PRODUCTS — MOBILE CARDS
+========================================================== */
+
+.admin-products-cards{
+
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+
+}
+
+.admin-product-card{
+
+    padding:14px;
+
+    background:#fff;
+
+    border:1px solid #e5e1da;
+    border-radius:var(--radius-md);
+
+}
+
+.admin-product-card-top{
+
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    margin-bottom:12px;
+
+}
+
+.admin-product-card-image{
+
+    width:56px;
+    height:56px;
+
+    object-fit:cover;
+
+    border-radius:8px;
+
+    flex-shrink:0;
+
+}
+
+.admin-product-card-info{
+
+    flex:1;
+    min-width:0;
+
+}
+
+.admin-product-card-name{
+
+    font-weight:700;
+    font-size:.95rem;
+
+    color:var(--text-dark);
+
+    margin-bottom:2px;
+
+}
+
+.admin-product-card-name-input{
+
+    width:100%;
+
+    padding:8px 10px;
+
+    background:#f5f4f1;
+
+    border:1px solid #e0ddd6;
+    border-radius:8px;
+
+    font-weight:700;
+
+    margin-bottom:4px;
+
+}
+
+.admin-product-card-category{
+
+    font-size:.72rem;
+    font-weight:600;
+
+    text-transform:uppercase;
+
+    color:var(--light-green);
+
+}
+
+.admin-product-card-pricing{
+
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+
+    padding:10px 0;
+
+    margin-bottom:12px;
+
+    border-top:1px dashed #eeece7;
+    border-bottom:1px dashed #eeece7;
+
+}
+
+.admin-product-card-field{
+
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+
+}
+
+.admin-product-card-field span{
+
+    font-size:.68rem;
+
+    text-transform:uppercase;
+
+    color:#999;
+
+}
+
+.admin-product-card-field strong{
+
+    font-size:.85rem;
+
+    color:var(--text-dark);
+
+}
+
+.admin-product-card-field input{
+
+    width:100%;
+
+    padding:6px 8px;
+
+    font-size:.85rem;
+
+    background:#f5f4f1;
+
+    border:1px solid #e0ddd6;
+    border-radius:6px;
+
+}
+
+.admin-product-card-actions{
+
+    display:flex;
+    gap:8px;
+
+}
+
+.admin-product-card-actions button{
+
+    flex:1;
+
+    padding:9px;
+
+    font-size:.82rem;
+
+}
+
+/* Table hidden until desktop; cards hidden once table takes over */
+
+.admin-products-table{
+
+    display:none;
+
+}
+
+
 @media(min-width:640px){
+
+.admin-products-cards{
+
+    display:none;
+
+}
+
+.admin-products-table{
+
+    display:block;
+
+}
 
 .admin-product-form{
 

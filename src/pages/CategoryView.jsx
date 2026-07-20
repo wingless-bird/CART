@@ -302,7 +302,8 @@ export default function CategoryView({
     setEditingId(null);
 
   };
-    // ==========================================================
+
+  // ==========================================================
   // DELETE PRODUCT
   // ==========================================================
 
@@ -429,7 +430,199 @@ export default function CategoryView({
 
       </form>
 
-            <div className="admin-products-table">
+      {/* ================================================
+          MOBILE: STACKED CARDS (below 640px)
+      ================================================ */}
+
+      <div className="admin-products-cards">
+
+        {filteredItems.map((item) => (
+
+          <div
+            className="admin-product-card"
+            key={item.id}
+          >
+
+            <div className="admin-product-card-top">
+
+              <img
+                src={getProductImage(item)}
+                alt={item.name}
+                className="admin-product-card-image"
+                onError={(e) => {
+                  e.target.src = PLACEHOLDER_IMAGE;
+                }}
+              />
+
+              <div className="admin-product-card-info">
+
+                {editingId === item.id ? (
+
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) =>
+                      setEditName(e.target.value)
+                    }
+                    className="admin-product-card-name-input"
+                  />
+
+                ) : (
+
+                  <div className="admin-product-card-name">
+                    {item.name}
+                  </div>
+
+                )}
+
+                <div className="admin-product-card-category">
+                  {item.category}
+                </div>
+
+              </div>
+
+            </div>
+
+            <div className="admin-product-card-pricing">
+
+              <div className="admin-product-card-field">
+
+                <span>Gross</span>
+
+                {editingId === item.id ? (
+
+                  <input
+                    type="number"
+                    value={editGrossAmount}
+                    onChange={(e) =>
+                      setEditGrossAmount(
+                        e.target.value
+                      )
+                    }
+                  />
+
+                ) : (
+
+                  <strong>
+                    {Number(
+                      item.grossAmount ??
+                      item.price ??
+                      0
+                    ).toFixed(2)}
+                  </strong>
+
+                )}
+
+              </div>
+
+              <div className="admin-product-card-field">
+
+                <span>Discount</span>
+
+                {editingId === item.id ? (
+
+                  <input
+                    type="number"
+                    value={editDiscount}
+                    onChange={(e) =>
+                      setEditDiscount(
+                        e.target.value
+                      )
+                    }
+                  />
+
+                ) : (
+
+                  <strong>
+                    {Number(item.discount || 0)}%
+                  </strong>
+
+                )}
+
+              </div>
+
+              <div className="admin-product-card-field">
+
+                <span>Net</span>
+
+                <strong>
+                  {editingId === item.id
+                    ? editNetAmount
+                    : Number(
+                        item.netAmount ??
+                        item.price ??
+                        0
+                      ).toFixed(2)}
+                </strong>
+
+              </div>
+
+            </div>
+
+            <div className="admin-product-card-actions">
+
+              {editingId === item.id ? (
+
+                <>
+
+                  <button
+                    className="admin-save-btn"
+                    onClick={() =>
+                      handleSaveUpdate(
+                        item.id,
+                        item
+                      )
+                    }
+                  >
+                    Save
+                  </button>
+
+                  <button
+                    className="admin-cancel-btn"
+                    onClick={() =>
+                      setEditingId(null)
+                    }
+                  >
+                    Cancel
+                  </button>
+
+                </>
+
+              ) : (
+
+                <button
+                  className="admin-edit-btn"
+                  onClick={() =>
+                    startEdit(item)
+                  }
+                >
+                  Edit
+                </button>
+
+              )}
+
+              <button
+                className="admin-delete-btn"
+                onClick={() =>
+                  handleDelete(item.id)
+                }
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+      {/* ================================================
+          DESKTOP: TABLE (640px and up)
+      ================================================ */}
+
+      <div className="admin-products-table">
 
         <table>
 
@@ -564,7 +757,9 @@ export default function CategoryView({
 
                 </td>
 
-                <td>                  {editingId === item.id ? (
+                <td>
+
+                  {editingId === item.id ? (
 
                     <>
 
@@ -630,4 +825,3 @@ export default function CategoryView({
   );
 
 }
-      
