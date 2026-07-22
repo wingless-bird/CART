@@ -439,6 +439,38 @@ section{
 
 }
 
+/* ==========================================================
+   ANNOUNCEMENT BAR
+========================================================== */
+
+.announcement-bar{
+
+    position:sticky;
+    top:0;
+    z-index:101;
+
+    padding:8px 16px;
+
+    text-align:center;
+
+    font-size:.75rem;
+    font-weight:600;
+
+    color:var(--white);
+
+    background:var(--light-green);
+
+}
+
+@media(min-width:768px){
+
+.announcement-bar{
+
+    font-size:.82rem;
+
+}
+
+}
 .navbar-container{
 
     display:flex;
@@ -1523,6 +1555,18 @@ section{
     margin-bottom:8px;
 
 }
+
+.cart-free-badge{
+
+    font-weight:700;
+
+    color:var(--dark-green);
+
+    text-transform:uppercase;
+    letter-spacing:.03em;
+
+}
+
 
 .cart-total-row{
 

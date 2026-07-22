@@ -7,6 +7,7 @@ import {
 
 const TAX_RATE = 0.19;
 const DELIVERY_FEE = 200;
+const FREE_DELIVERY_THRESHOLD = 2000;
 const CURRENCY = "PKR";
 
 export default function CartDrawer({
@@ -25,6 +26,7 @@ export default function CartDrawer({
     subtotal,
     tax,
     deliveryFee,
+    isFreeDelivery,
     grandTotal
   } = useMemo(() => {
 
@@ -41,10 +43,13 @@ export default function CartDrawer({
 
     const tax = subtotal * TAX_RATE;
 
+    const isFreeDelivery =
+      subtotal >= FREE_DELIVERY_THRESHOLD;
+
     const deliveryFee =
-      cart.length > 0
-        ? DELIVERY_FEE
-        : 0;
+      cart.length === 0 || isFreeDelivery
+        ? 0
+        : DELIVERY_FEE;
 
     return {
 
@@ -53,6 +58,8 @@ export default function CartDrawer({
       tax,
 
       deliveryFee,
+
+      isFreeDelivery,
 
       grandTotal:
         subtotal +
@@ -228,17 +235,39 @@ export default function CartDrawer({
 
               </div>
 
-              <div className="cart-bill-row">
+              {
 
-                <span>
-                  Delivery Fee:
-                </span>
+                isFreeDelivery ? (
 
-                <span>
-                  {CURRENCY} {deliveryFee.toFixed(2)}
-                </span>
+                  <div className="cart-bill-row cart-bill-row-free">
 
-              </div>
+                    <span>
+                      Delivery Fee:
+                    </span>
+
+                    <span className="cart-free-badge">
+                      FREE
+                    </span>
+
+                  </div>
+
+                ) : (
+
+                  <div className="cart-bill-row">
+
+                    <span>
+                      Delivery Fee:
+                    </span>
+
+                    <span>
+                      {CURRENCY} {deliveryFee.toFixed(2)}
+                    </span>
+
+                  </div>
+
+                )
+
+              }
 
               <div className="cart-total-row">
 
