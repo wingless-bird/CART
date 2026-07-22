@@ -13,13 +13,17 @@ export default function StoreLayout() {
 
     <div className="store-app">
 
-      <div className="announcement-bar">
-        🚚 Free Delivery over 2000 PKR &nbsp;•&nbsp; Mon – Sat &nbsp;•&nbsp; Next Day Delivery
-      </div>
+      <div className="site-header">
 
-      <Navbar
-        onCartOpen={() => setIsCartOpen(true)}
-      />
+        <div className="announcement-bar">
+          🚚 Free Delivery over 2000 PKR &nbsp;•&nbsp; Mon – Sat &nbsp;•&nbsp; Next Day Delivery
+        </div>
+
+        <Navbar
+          onCartOpen={() => setIsCartOpen(true)}
+        />
+
+      </div>
 
       <main className="store-content">
         <Outlet />

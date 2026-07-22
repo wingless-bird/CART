@@ -427,10 +427,6 @@ section{
 
 .navbar{
 
-    position:sticky;
-    top:0;
-    z-index:100;
-
     background:rgba(182, 212, 183, 0.92);
     backdrop-filter:blur(14px);
     -webkit-backdrop-filter:blur(14px);
@@ -445,10 +441,6 @@ section{
 
 .announcement-bar{
 
-    position:sticky;
-    top:0;
-    z-index:101;
-
     padding:8px 16px;
 
     text-align:center;
@@ -459,6 +451,14 @@ section{
     color:var(--white);
 
     background:var(--light-green);
+
+}
+
+.site-header{
+
+    position:sticky;
+    top:0;
+    z-index:100;
 
 }
 
